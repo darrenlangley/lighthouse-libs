@@ -1,4 +1,7 @@
+
 # Lighthouse Libraries
+
+[![Build Status](https://travis-ci.org/sigp/lighthouse-libs.svg?branch=master)](https://travis-ci.org/sigp/lighthouse-libs) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/sigp/lighthouse?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 A collection of Rust crates common to the Lighthouse Ethereum 2.0 project.
 
