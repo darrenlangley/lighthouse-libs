@@ -70,13 +70,13 @@ impl SszStream {
 /// Encode some length into a ssz size prefix.
 ///
 /// The ssz size prefix is 4 bytes, which is treated as a continuious
-/// 32bit big-endian integer.
+/// 32bit little-endian integer.
 pub fn encode_length(len: usize, length_bytes: usize) -> Vec<u8> {
     assert!(length_bytes > 0); // For sanity
     assert!((len as usize) < 2usize.pow(length_bytes as u32 * 8));
     let mut header: Vec<u8> = vec![0; length_bytes];
     for (i, header_byte) in header.iter_mut().enumerate() {
-        let offset = (length_bytes - i - 1) * 8;
+        let offset = (length_bytes - (length_bytes - i)) * 8;
         *header_byte = ((len >> offset) & 0xff) as u8;
     }
     header
@@ -95,9 +95,9 @@ mod tests {
     #[test]
     fn test_encode_length_4_bytes() {
         assert_eq!(encode_length(0, LENGTH_BYTES), vec![0; 4]);
-        assert_eq!(encode_length(1, LENGTH_BYTES), vec![0, 0, 0, 1]);
-        assert_eq!(encode_length(255, LENGTH_BYTES), vec![0, 0, 0, 255]);
-        assert_eq!(encode_length(256, LENGTH_BYTES), vec![0, 0, 1, 0]);
+        assert_eq!(encode_length(1, LENGTH_BYTES), vec![1, 0, 0, 0]);
+        assert_eq!(encode_length(255, LENGTH_BYTES), vec![255, 0, 0, 0]);
+        assert_eq!(encode_length(256, LENGTH_BYTES), vec![0, 1, 0, 0]);
         assert_eq!(
             encode_length(4294967295, LENGTH_BYTES), // 2^(3*8) - 1
             vec![255, 255, 255, 255]
@@ -118,7 +118,7 @@ mod tests {
         let ssz = stream.drain();
 
         assert_eq!(ssz.len(), 4 + (12 * 2));
-        assert_eq!(ssz[0..4], *vec![0, 0, 0, 24]);
-        assert_eq!(ssz[4..6], *vec![1, 0]);
+        assert_eq!(ssz[0..4], *vec![24, 0, 0, 0]);
+        assert_eq!(ssz[4..6], *vec![0, 1]);
     }
 }

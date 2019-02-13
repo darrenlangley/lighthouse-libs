@@ -65,7 +65,7 @@ where
 }
 
 /// Given some number of bytes, interpret the first four
-/// bytes as a 32-bit big-endian integer and return the
+/// bytes as a 32-bit little-endian integer and return the
 /// result.
 pub fn decode_length(
     bytes: &[u8],
@@ -82,7 +82,7 @@ pub fn decode_length(
         .take(index + length_bytes)
         .skip(index)
     {
-        let offset = (index + length_bytes - i - 1) * 8;
+        let offset = (length_bytes - (length_bytes - (i - index))) * 8;
         len |= (*byte as usize) << offset;
     }
     Ok(len)
@@ -95,13 +95,13 @@ mod tests {
 
     #[test]
     fn test_ssz_decode_length() {
-        let decoded = decode_length(&vec![0, 0, 0, 1], 0, LENGTH_BYTES);
+        let decoded = decode_length(&vec![1, 0, 0, 0], 0, LENGTH_BYTES);
         assert_eq!(decoded.unwrap(), 1);
 
-        let decoded = decode_length(&vec![0, 0, 1, 0], 0, LENGTH_BYTES);
+        let decoded = decode_length(&vec![0, 1, 0, 0], 0, LENGTH_BYTES);
         assert_eq!(decoded.unwrap(), 256);
 
-        let decoded = decode_length(&vec![0, 0, 1, 255], 0, LENGTH_BYTES);
+         let decoded = decode_length(&vec![255, 1, 0, 0], 0, LENGTH_BYTES);
         assert_eq!(decoded.unwrap(), 511);
 
         let decoded = decode_length(&vec![255, 255, 255, 255], 0, LENGTH_BYTES);
@@ -137,7 +137,7 @@ mod tests {
         // u16
         let v: Vec<u16> = vec![10, 10, 10, 10];
         let decoded: (Vec<u16>, usize) =
-            decode_ssz_list(&vec![0, 0, 0, 8, 0, 10, 0, 10, 0, 10, 0, 10], 0).unwrap();
+            decode_ssz_list(&vec![8, 0, 0, 0, 10, 0, 10, 0, 10, 0, 10, 0], 0).unwrap();
 
         assert_eq!(decoded.0, v);
         assert_eq!(decoded.1, 12);
@@ -146,7 +146,7 @@ mod tests {
         let v: Vec<u32> = vec![10, 10, 10, 10];
         let decoded: (Vec<u32>, usize) = decode_ssz_list(
             &vec![
-                0, 0, 0, 16, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0, 10,
+                16, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 00,
             ],
             0,
         )
@@ -158,8 +158,8 @@ mod tests {
         let v: Vec<u64> = vec![10, 10, 10, 10];
         let decoded: (Vec<u64>, usize) = decode_ssz_list(
             &vec![
-                0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0,
-                10, 0, 0, 0, 0, 0, 0, 0, 10,
+                32, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0,
+                0, 10, 0, 0, 0, 0, 0, 0, 0,
             ],
             0,
         )
@@ -171,8 +171,8 @@ mod tests {
         let v: Vec<usize> = vec![15, 15, 15, 15];
         let decoded: (Vec<usize>, usize) = decode_ssz_list(
             &vec![
-                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0,
-                0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 15,
+                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 32, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0,
+                0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0,
             ],
             10,
         )
@@ -182,12 +182,12 @@ mod tests {
 
         // Check that length > bytes throws error
         let decoded: Result<(Vec<usize>, usize), DecodeError> =
-            decode_ssz_list(&vec![0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 15], 0);
+            decode_ssz_list(&vec![32, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0], 0);
         assert_eq!(decoded, Err(DecodeError::TooShort));
 
         // Check that incorrect index throws error
         let decoded: Result<(Vec<usize>, usize), DecodeError> =
-            decode_ssz_list(&vec![0, 0, 0, 0, 0, 0, 0, 15], 16);
+            decode_ssz_list(&vec![15, 0, 0, 0, 0, 0, 0, 0], 16);
         assert_eq!(decoded, Err(DecodeError::TooShort));
     }
 }
