@@ -1,4 +1,4 @@
-# Lighthouse Common
+# Lighthouse Lib
 
 A collection of Rust crates common to the Lighthouse Ethereum 2.0 project.
 
@@ -17,12 +17,10 @@ All library components are Rust crates.
 
 - [`attester`](attester/): a state-machine which fulfils the duties of a Beacon Chain
 	attester. Defines traits for communication with the Beacon Node, signing
-	services and persistant storage whilst deferring their implementation to
-	upstream packages.
+	services and persistant storage whilst deferring their implementation.
 - [`block_producer`](attester/): a state-machine which fulfils the duties of a Beacon Chain
 	block producer. Defines traits for communication with the Beacon Node, signing
-	services and persistant storage whilst deferring their implementation to
-	upstream packages.
+	services and persistant storage whilst deferring their implementation.
 - [`bls`](bls/): wraps an existing BLS cryptography library and provides Eth 2.0
 	specific functionality.
 - [`boolean-bitfield`](boolean-bitfield/): provides a variable-length `Vec` of `bool`, fulfilling
