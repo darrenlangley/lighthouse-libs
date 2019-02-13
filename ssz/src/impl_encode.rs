@@ -206,4 +206,25 @@ mod tests {
         ssz.append(&x);
         assert_eq!(ssz.drain(), vec![255, 255, 255, 255, 255, 255, 255, 255]);
     }
+
+    #[test]
+    fn test_ssz_mixed() {
+        let mut stream = SszStream::new();
+
+        let h = Address::zero();
+        let a: u8 = 100;
+        let b: u16 = 65535;
+        let c: u32 = 1 << 24;
+
+        stream.append(&h);
+        stream.append(&a);
+        stream.append(&b);
+        stream.append(&c);
+
+        let ssz = stream.drain();        
+        assert_eq!(ssz[0..20], *vec![0; 20]);
+        assert_eq!(ssz[20], 100);
+        assert_eq!(ssz[21..23], *vec![255, 255]);
+        assert_eq!(ssz[23..27], *vec![0, 0, 0, 1]);
+    }
 }

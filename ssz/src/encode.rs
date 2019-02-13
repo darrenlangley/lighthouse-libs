@@ -105,6 +105,18 @@ mod tests {
     }
 
     #[test]
+    fn test_encode_length_new_lower_default() {
+        assert_eq!(encode_length(0, LENGTH_BYTES - 2), vec![0; 2]);
+        assert_eq!(encode_length(1, LENGTH_BYTES - 2), vec![1, 0]);
+    }
+
+    #[test]
+    fn test_encode_length_new_higher_default() {
+        assert_eq!(encode_length(0, LENGTH_BYTES + 2), vec![0; 6]);
+        assert_eq!(encode_length(1, LENGTH_BYTES + 2), vec![1, 0, 0, 0, 0, 0]);
+    }
+
+    #[test]
     #[should_panic]
     fn test_encode_length_4_bytes_panic() {
         encode_length(4294967296, LENGTH_BYTES); // 2^(3*8)
@@ -119,6 +131,40 @@ mod tests {
 
         assert_eq!(ssz.len(), 4 + (12 * 2));
         assert_eq!(ssz[0..4], *vec![24, 0, 0, 0]);
-        assert_eq!(ssz[4..6], *vec![0, 1]);
+        assert_eq!(ssz[4..6], *vec![0, 1]);        
+    }
+
+    #[test]
+    fn test_encode_mixed_prefixed() {
+        let test_vec: Vec<u16> = vec![100, 200];
+        let test_value: u8 = 5;
+        
+        let mut stream = SszStream::new();
+        stream.append_vec(&test_vec);
+        stream.append(&test_value);
+        let ssz = stream.drain();
+
+        assert_eq!(ssz.len(), 4 + (2 * 2) + 1);
+        assert_eq!(ssz[0..4], *vec![4, 0, 0, 0]);
+        assert_eq!(ssz[4..6], *vec![100, 0]);
+        assert_eq!(ssz[6..8], *vec![200, 0]);
+        assert_eq!(ssz[8], 5);
+    }
+
+     #[test]
+    fn test_encode_mixed_postfixed() {
+        let test_value: u8 = 5;
+        let test_vec: Vec<u16> = vec![100, 200];        
+        
+        let mut stream = SszStream::new();
+        stream.append(&test_value);
+        stream.append_vec(&test_vec);
+        let ssz = stream.drain();
+
+        assert_eq!(ssz.len(), 1 + 4 + (2 * 2));
+        assert_eq!(ssz[0], 5);
+        assert_eq!(ssz[1..5], *vec![4, 0, 0, 0]);
+        assert_eq!(ssz[5..7], *vec![100, 0]);
+        assert_eq!(ssz[7..9], *vec![200, 0]);
     }
 }
