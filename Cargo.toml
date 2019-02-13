@@ -1,0 +1,15 @@
+[workspace]
+members = [
+	"attester",
+	"block_producer",
+	"bls",
+	"boolean-bitfield",
+	"hashing",
+	"honey-badger-split",
+	"protos",
+	"slot_clock",
+	"ssz",
+	"state_processing",
+	"types",
+	"vec_shuffle",
+]
