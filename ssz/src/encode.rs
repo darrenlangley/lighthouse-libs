@@ -105,13 +105,13 @@ mod tests {
     }
 
     #[test]
-    fn test_encode_length_new_lower_default() {
+    fn test_encode_lower_length() {
         assert_eq!(encode_length(0, LENGTH_BYTES - 2), vec![0; 2]);
         assert_eq!(encode_length(1, LENGTH_BYTES - 2), vec![1, 0]);
     }
 
     #[test]
-    fn test_encode_length_new_higher_default() {
+    fn test_encode_higher_length() {
         assert_eq!(encode_length(0, LENGTH_BYTES + 2), vec![0; 6]);
         assert_eq!(encode_length(1, LENGTH_BYTES + 2), vec![1, 0, 0, 0, 0, 0]);
     }
@@ -129,7 +129,7 @@ mod tests {
         stream.append_vec(&test_vec);
         let ssz = stream.drain();
 
-        assert_eq!(ssz.len(), 4 + (12 * 2));
+        assert_eq!(ssz.len(), LENGTH_BYTES + (12 * 2));
         assert_eq!(ssz[0..4], *vec![24, 0, 0, 0]);
         assert_eq!(ssz[4..6], *vec![0, 1]);        
     }
@@ -144,7 +144,7 @@ mod tests {
         stream.append(&test_value);
         let ssz = stream.drain();
 
-        assert_eq!(ssz.len(), 4 + (2 * 2) + 1);
+        assert_eq!(ssz.len(), LENGTH_BYTES + (2 * 2) + 1);
         assert_eq!(ssz[0..4], *vec![4, 0, 0, 0]);
         assert_eq!(ssz[4..6], *vec![100, 0]);
         assert_eq!(ssz[6..8], *vec![200, 0]);
@@ -161,7 +161,7 @@ mod tests {
         stream.append_vec(&test_vec);
         let ssz = stream.drain();
 
-        assert_eq!(ssz.len(), 1 + 4 + (2 * 2));
+        assert_eq!(ssz.len(), 1 + LENGTH_BYTES + (2 * 2));
         assert_eq!(ssz[0], 5);
         assert_eq!(ssz[1..5], *vec![4, 0, 0, 0]);
         assert_eq!(ssz[5..7], *vec![100, 0]);
